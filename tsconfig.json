@@ -1,0 +1,18 @@
+{
+  "compilerOptions": {
+    "baseUrl": "./",
+    "module": "commonjs",
+    "target": "es2022",
+    "declaration": true,
+    "strict": true,
+    "allowUnreachableCode": false,
+    "skipLibCheck": true,
+    "removeComments": true,
+    "esModuleInterop": true,
+    "outDir": "./dist",
+    "paths": {
+      "@/*": ["src/*"],
+      "¿/*": ["test/*"]
+    }
+  }
+}

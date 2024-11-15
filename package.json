@@ -1,0 +1,60 @@
+{
+  "name": "@plokkke/dougs-compta",
+  "private": false,
+  "version": "0.1.1",
+  "main": "dist/index.js",
+  "module": "dist/index.mjs",
+  "types": "dist/index.d.ts",
+  "scripts": {
+    "build": "tsup",
+    "dev": "tsup --watch",
+    "lint": "eslint \"{src,apps,libs,test}/**/*.ts\"",
+    "lint:fix": "npm run lint -- --fix",
+    "test": "npm run test:unit",
+    "test:cov": "npm run test:unit:cov",
+    "test:unit": "jest --config ./test/jest-unit.js",
+    "test:unit:cov": "npm run test:unit -- --coverage",
+    "validate": "npm run lint && npm run test:cov && npm run build"
+  },
+  "keywords": [
+    "dougs",
+    "compta",
+    "api"
+  ],
+  "author": "Antoine Caron <antoine@crn-tech.fr>",
+  "license": "MIT",
+  "description": "",
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/Plokkke/dougs-compta"
+  },
+  "dependencies": {
+    "axios": "^1.7.7",
+    "luxon": "^3.5.0",
+    "zod": "^3.23.8"
+  },
+  "devDependencies": {
+    "@stryker-mutator/core": "^8.6.0",
+    "@stryker-mutator/jest-runner": "^8.6.0",
+    "@stryker-mutator/typescript-checker": "^8.6.0",
+    "@types/jest": "^29.5.2",
+    "@types/luxon": "^3.4.2",
+    "@types/node": "^20.3.1",
+    "@types/supertest": "^6.0.0",
+    "@typescript-eslint/eslint-plugin": "^8.0.0",
+    "@typescript-eslint/parser": "^8.0.0",
+    "eslint": "^8.42.0",
+    "eslint-config-prettier": "^9.0.0",
+    "eslint-plugin-import": "^2.31.0",
+    "eslint-plugin-prettier": "^5.0.0",
+    "jest": "^29.5.0",
+    "prettier": "^3.0.0",
+    "supertest": "^7.0.0",
+    "ts-jest": "^29.1.0",
+    "ts-loader": "^9.4.3",
+    "ts-node": "^10.9.1",
+    "tsconfig-paths": "^4.2.0",
+    "tsup": "^8.3.5",
+    "typescript": "^5.6.3"
+  }
+}
