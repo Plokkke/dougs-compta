@@ -17,11 +17,11 @@ npm install @plokkke/dougs-compta
 Pour utiliser la bibliothèque, commencez par créer une instance de `DougsApi` avec vos identifiants de connexion.
 
 ```typescript
-import { DougsApi } from 'dougs-compta';
+import { DougsApiByLogin } from 'dougs-compta';
 import { DateTime } from 'luxon';
 
 (async () => {
-  const api = new DougsApi({
+  const api = new DougsApiByLogin({
     username: 'john.doe@domain.com',
     password: 'password',
   });

@@ -1,13 +1,14 @@
 {
   "name": "@plokkke/dougs-compta",
   "private": false,
-  "version": "0.2.0",
-  "main": "dist/index.js",
-  "module": "dist/index.mjs",
-  "types": "dist/index.d.ts",
+  "version": "0.3.0",
+  "main": "dist/main.js",
+  "module": "dist/main.mjs",
+  "types": "dist/main.d.ts",
   "scripts": {
     "build": "tsup",
     "dev": "tsup --watch",
+    "start:local": "ts-node -r tsconfig-paths/register src/local.ts",
     "lint": "eslint \"{src,apps,libs,test}/**/*.ts\"",
     "lint:fix": "npm run lint -- --fix",
     "test": "npm run test:unit",
