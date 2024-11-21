@@ -10,6 +10,8 @@ import {
   DougsCredentials,
   ExpenseInfos,
   MileageInfos,
+  Partner,
+  partnerSchema,
   User,
   userSchema,
 } from '@/schemas/types';
@@ -52,8 +54,13 @@ export abstract class DougsApi {
     return categorySchema.array().parse(response.data);
   }
 
-  async registerMileageAllowance(companyId: number, mileage: MileageInfos): Promise<void> {
-    await this.axios.post(`/companies/${companyId}/operations`, {
+  async getPartners(companyId: number): Promise<Partner[]> {
+    const response = await this.axios.get(`/companies/${companyId}/partners`);
+    return partnerSchema.array().parse(response.data);
+  }
+
+  async registerMileageAllowance(companyId: number, mileage: MileageInfos): Promise<unknown> {
+    const response = await this.axios.post(`/companies/${companyId}/operations`, {
       type: 'kilometricIndemnity',
       date: mileage.date.toISO(),
       memo: mileage.memo,
@@ -68,11 +75,12 @@ export abstract class DougsApi {
         },
       ],
     });
+    return response.data;
   }
 
-  async registerExpense(companyId: number, expense: ExpenseInfos): Promise<void> {
+  async registerExpense(companyId: number, expense: ExpenseInfos): Promise<unknown> {
     const amount = expense.amount / 100;
-    await this.axios.post(`/companies/${companyId}/operations`, {
+    const response = await this.axios.post(`/companies/${companyId}/operations`, {
       type: 'expense',
       date: expense.date.toISO(),
       memo: expense.memo,
@@ -83,6 +91,7 @@ export abstract class DougsApi {
         { amount: 0, categoryId: -1, isCounterpart: true, associationData: { partnerId: expense.partnerId } },
       ],
     });
+    return response.data;
   }
 
   async updateOperation(companyId: number, operationId: number, infos: Record<string, unknown>): Promise<void> {

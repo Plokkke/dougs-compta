@@ -78,3 +78,17 @@ export const categorySchema = z.object({
 });
 
 export type Category = z.infer<typeof categorySchema>;
+
+export const partnerSchema = z.object({
+  id: z.number(),
+  position: z.string(),
+  naturalPerson: z.object({
+    id: z.number(),
+    firstName: z.string(),
+    lastName: z.string(),
+    fullName: z.string(),
+    initials: z.string(),
+  }),
+});
+
+export type Partner = z.infer<typeof partnerSchema>;
