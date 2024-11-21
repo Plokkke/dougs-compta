@@ -1,16 +1,19 @@
 import { DateTime } from 'luxon';
 import { z } from 'zod';
 
+const schemaValidDateTime = z
+  .string()
+  .date()
+  .transform((value) => DateTime.fromISO(value))
+  .refine((value) => value.isValid, { message: 'Invalid date' });
+
 export type DougsCredentials = {
   username: string;
   password: string;
 };
 
 export const operationSchema = z.object({
-  date: z
-    .string()
-    .date()
-    .transform((value) => DateTime.fromISO(value)),
+  date: schemaValidDateTime,
   memo: z.string().optional(),
 });
 

@@ -75,6 +75,19 @@ export class DougsApi {
     return carSchema.array().parse(response.data);
   }
 
+  // TODO type is enum
+  async getCategories(companyId: number, type: string, search?: string): Promise<Category[]> {
+    await this.authenticate();
+    const response = await this.axios.get(`/companies/${companyId}/categories`, {
+      params: {
+        full: true,
+        type,
+        ...(search && { search }),
+      },
+    });
+    return categorySchema.array().parse(response.data);
+  }
+
   async registerMileageAllowance(companyId: number, mileage: MileageInfos): Promise<void> {
     await this.authenticate();
     await this.axios.post(`/companies/${companyId}/operations`, {
@@ -101,25 +114,13 @@ export class DougsApi {
       type: 'expense',
       date: expense.date.toISO(),
       memo: expense.memo,
-      amount: amount,
+      amount,
       attachments: [],
       breakdowns: [
-        { amount: amount, categoryId: expense.categoryId },
+        { amount, categoryId: expense.categoryId },
         { amount: 0, categoryId: -1, isCounterpart: true, associationData: { partnerId: expense.partnerId } },
       ],
     });
-  }
-
-  async getCategories(companyId: number, type: string, search?: string): Promise<Category[]> {
-    await this.authenticate();
-    const response = await this.axios.get(`/companies/${companyId}/categories`, {
-      params: {
-        full: true,
-        type: type,
-        ...(search && { search }),
-      },
-    });
-    return categorySchema.array().parse(response.data);
   }
 
   async updateOperation(companyId: number, operationId: number, infos: Record<string, unknown>): Promise<void> {
