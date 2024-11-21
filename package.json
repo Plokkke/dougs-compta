@@ -30,6 +30,7 @@
   },
   "dependencies": {
     "axios": "^1.7.7",
+    "lodash": "^4.17.21",
     "luxon": "^3.5.0",
     "zod": "^3.23.8"
   },
@@ -38,6 +39,7 @@
     "@stryker-mutator/jest-runner": "^8.6.0",
     "@stryker-mutator/typescript-checker": "^8.6.0",
     "@types/jest": "^29.5.2",
+    "@types/lodash": "^4.17.13",
     "@types/luxon": "^3.4.2",
     "@types/node": "^20.3.1",
     "@types/supertest": "^6.0.0",

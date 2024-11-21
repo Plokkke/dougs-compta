@@ -6,12 +6,31 @@ export type DougsCredentials = {
   password: string;
 };
 
-export type MileageInfos = {
-  date: DateTime<true>;
-  distance: number;
-  reason: string;
-  carId?: number;
-};
+export const operationSchema = z.object({
+  date: z
+    .string()
+    .date()
+    .transform((value) => DateTime.fromISO(value)),
+  memo: z.string().optional(),
+});
+
+export type Operation = z.infer<typeof operationSchema>;
+
+export const mileageInfosSchema = operationSchema.extend({
+  distance: z.number().int(),
+  carId: z.number().int().optional(),
+});
+
+export type MileageInfos = z.infer<typeof mileageInfosSchema>;
+
+export const expenseInfosSchema = operationSchema.extend({
+  amount: z.number().int(),
+  categoryId: z.number().int(),
+  partnerId: z.number().int(),
+  hasVat: z.boolean().optional().default(true),
+});
+
+export type ExpenseInfos = z.infer<typeof expenseInfosSchema>;
 
 export const companySchema = z.object({
   id: z.number(),
@@ -28,3 +47,31 @@ export const userSchema = z.object({
 });
 
 export type User = z.infer<typeof userSchema>;
+
+export const carSchema = z.object({
+  id: z.number(),
+  name: z.string(),
+  content: z.object({
+    licensePlate: z.string(),
+  }),
+  partner: z.object({
+    naturalPerson: z.object({
+      id: z.number(),
+      firstName: z.string(),
+      lastName: z.string(),
+      fullName: z.string(),
+      initials: z.string(),
+    }),
+  }),
+});
+
+export type Car = z.infer<typeof carSchema>;
+
+export const categorySchema = z.object({
+  id: z.number(),
+  wording: z.string(),
+  keywords: z.array(z.string()),
+  description: z.string(),
+});
+
+export type Category = z.infer<typeof categorySchema>;
