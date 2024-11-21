@@ -17,7 +17,7 @@ import {
 } from '@/schemas/types';
 import { parseCookies } from '@/utils';
 
-export { Car, Category, Company, DougsCredentials, ExpenseInfos, MileageInfos, User } from '@/schemas/types';
+export { Car, Category, Company, DougsCredentials, ExpenseInfos, MileageInfos, Partner, User } from '@/schemas/types';
 
 export abstract class DougsApi {
   protected readonly axios;
