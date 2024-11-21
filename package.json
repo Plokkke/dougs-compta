@@ -1,7 +1,7 @@
 {
   "name": "@plokkke/dougs-compta",
   "private": false,
-  "version": "0.3.3",
+  "version": "0.3.4",
   "main": "dist/main.js",
   "module": "dist/main.mjs",
   "types": "dist/main.d.ts",
@@ -16,7 +16,7 @@
     "test:unit": "jest --config ./test/jest-unit.js",
     "test:unit:cov": "npm run test:unit -- --coverage",
     "validate": "npm run lint && npm run test:cov && npm run build",
-    "prepublish": "npm run validate"
+    "prepublishOnly": "npm run validate"
   },
   "keywords": [
     "dougs",
