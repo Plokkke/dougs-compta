@@ -95,14 +95,16 @@ export abstract class DougsApi {
   }
 
   async updateOperation(companyId: number, operationId: number, infos: Record<string, unknown>): Promise<void> {
-    const response = await this.axios.get(`/companies/${companyId}/operations/${operationId}`);
-
-    const payload = _.merge(response.data, infos);
-    await this.axios.post(`/companies/${companyId}/operations/${operationId}`, payload);
+    const { data } = await this.axios.get(`/companies/${companyId}/operations/${operationId}`);
+    const { data: operation } = await this.axios.post(
+      `/companies/${companyId}/operations/${operationId}`,
+      _.merge(data, infos),
+    );
+    return operation;
   }
 
   async validateOperation(companyId: number, operationId: number): Promise<void> {
-    await this.updateOperation(companyId, operationId, { validated: true });
+    return await this.updateOperation(companyId, operationId, { validated: true });
   }
 
   async deleteOperation(companyId: number, operationId: number): Promise<void> {
