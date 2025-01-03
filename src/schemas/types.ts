@@ -13,20 +13,36 @@ export type DougsCredentials = {
 };
 
 export const operationSchema = z.object({
-  date: schemaValidDateTime,
-  memo: z.string().optional(),
+  id: z.number(),
+  companyId: z.number(),
+  type: z.string(),
+  amount: z.number(),
+  date: z.string().date(),
+  wording: z.string(),
+  name: z.string(),
+  hasVat: z.boolean(),
+  vatRate: z.union([z.number(), z.null()]),
+  vatAmount: z.union([z.number(), z.null()]),
+  totalAmount: z.number(),
+  memo: z.union([z.string(), z.null()]),
+  validated: z.boolean(),
+  breakdowns: z.array(z.unknown()),
 });
 
 export type Operation = z.infer<typeof operationSchema>;
 
-export const mileageInfosSchema = operationSchema.extend({
+export const mileageInfosSchema = z.object({
+  date: schemaValidDateTime,
+  memo: z.string().optional(),
   distance: z.number().int(),
   carId: z.number().int().optional(),
 });
 
 export type MileageInfos = z.infer<typeof mileageInfosSchema>;
 
-export const expenseInfosSchema = operationSchema.extend({
+export const expenseInfosSchema = z.object({
+  date: schemaValidDateTime,
+  memo: z.string().optional(),
   amount: z.number().int(),
   categoryId: z.number().int(),
   partnerId: z.number().int(),

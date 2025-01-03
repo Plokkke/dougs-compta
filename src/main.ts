@@ -1,4 +1,4 @@
-import axios from 'axios';
+import axios, { AxiosError, AxiosRequestConfig } from 'axios';
 import * as _ from 'lodash';
 import { DateTime } from 'luxon';
 
@@ -10,6 +10,8 @@ import {
   DougsCredentials,
   ExpenseInfos,
   MileageInfos,
+  Operation,
+  operationSchema,
   Partner,
   partnerSchema,
   User,
@@ -18,6 +20,39 @@ import {
 import { parseCookies } from '@/utils';
 
 export { Car, Category, Company, DougsCredentials, ExpenseInfos, MileageInfos, Partner, User } from '@/schemas/types';
+
+function delay(ms: number): Promise<void> {
+  return new Promise((resolve) => setTimeout(resolve, ms));
+}
+
+type RetryConfig = {
+  maxRetries: number;
+  retryableStatusCodes: number[];
+};
+
+function isRetryableError({ config: request, response }: AxiosError, config: RetryConfig): boolean {
+  if (!request || !response) {
+    return false;
+  }
+
+  if (!config.retryableStatusCodes.includes(response.status)) {
+    return false;
+  }
+
+  const r = <AxiosRequestConfig & { retryCount?: number }>request;
+  r.retryCount = r.retryCount || 0;
+  if (r.retryCount > config.maxRetries) {
+    return false;
+  }
+
+  return true;
+}
+
+const RETRY_CONFIG = {
+  maxRetries: 3,
+  retryableStatusCodes: [429, 500, 502, 503, 504],
+  delayStepMs: 350,
+};
 
 export abstract class DougsApi {
   protected readonly axios;
@@ -30,6 +65,24 @@ export abstract class DougsApi {
         origin: 'https://app.dougs.fr',
       },
     });
+
+    this.axios.interceptors.response.use(
+      (r) => r,
+      async (error) => {
+        if (!(error instanceof axios.AxiosError)) {
+          throw error;
+        }
+
+        if (isRetryableError(error, RETRY_CONFIG)) {
+          const config = error.config as AxiosRequestConfig & { retryCount: number };
+          config.retryCount += 1;
+          await delay(config.retryCount * RETRY_CONFIG.delayStepMs);
+          return axios(config);
+        }
+
+        throw error;
+      },
+    );
   }
 
   async getMe(): Promise<User> {
@@ -59,7 +112,7 @@ export abstract class DougsApi {
     return partnerSchema.array().parse(response.data);
   }
 
-  async registerMileageAllowance(companyId: number, mileage: MileageInfos): Promise<unknown> {
+  async registerMileageAllowance(companyId: number, mileage: MileageInfos): Promise<Operation> {
     const response = await this.axios.post(`/companies/${companyId}/operations`, {
       type: 'kilometricIndemnity',
       date: mileage.date.toISO(),
@@ -75,10 +128,10 @@ export abstract class DougsApi {
         },
       ],
     });
-    return response.data;
+    return operationSchema.parse(response.data);
   }
 
-  async registerExpense(companyId: number, expense: ExpenseInfos): Promise<unknown> {
+  async registerExpense(companyId: number, expense: ExpenseInfos): Promise<Operation> {
     const amount = expense.amount / 100;
     const response = await this.axios.post(`/companies/${companyId}/operations`, {
       type: 'expense',
@@ -91,20 +144,31 @@ export abstract class DougsApi {
         { amount: 0, categoryId: -1, isCounterpart: true, associationData: { partnerId: expense.partnerId } },
       ],
     });
-    return response.data;
+    return operationSchema.parse(response.data);
   }
 
-  async updateOperation(companyId: number, operationId: number, infos: Record<string, unknown>): Promise<void> {
+  async listOperations(companyId: number, filter?: Partial<Operation>): Promise<Operation[]> {
+    const response = await this.axios.get<unknown[]>(`/companies/${companyId}/operations`, {
+      params: filter,
+    });
+    return operationSchema.array().parse(response.data);
+  }
+
+  async updateOperation(companyId: number, operationId: number, infos: Record<string, unknown>): Promise<Operation> {
     const { data } = await this.axios.get(`/companies/${companyId}/operations/${operationId}`);
     const { data: operation } = await this.axios.post(
       `/companies/${companyId}/operations/${operationId}`,
       _.merge(data, infos),
     );
-    return operation;
+    return operationSchema.parse(operation);
   }
 
-  async validateOperation(companyId: number, operationId: number): Promise<void> {
+  async validateOperation(companyId: number, operationId: number): Promise<Operation> {
     return await this.updateOperation(companyId, operationId, { validated: true });
+  }
+
+  async invalidateOperation(companyId: number, operationId: number): Promise<Operation> {
+    return await this.updateOperation(companyId, operationId, { validated: false });
   }
 
   async deleteOperation(companyId: number, operationId: number): Promise<void> {
