@@ -112,10 +112,15 @@ export abstract class DougsApi {
     return partnerSchema.array().parse(response.data);
   }
 
+  async createOperation(companyId: number, payload: unknown): Promise<Operation> {
+    const response = await this.axios.post(`/companies/${companyId}/operations`, payload);
+    return operationSchema.parse(response.data);
+  }
+
   async registerMileageAllowance(companyId: number, mileage: MileageInfos): Promise<Operation> {
-    const response = await this.axios.post(`/companies/${companyId}/operations`, {
+    return this.createOperation(companyId, {
       type: 'kilometricIndemnity',
-      date: mileage.date.toISO(),
+      date: mileage.date.toISODate(),
       memo: mileage.memo,
       breakdowns: [
         {
@@ -128,23 +133,20 @@ export abstract class DougsApi {
         },
       ],
     });
-    return operationSchema.parse(response.data);
   }
 
   async registerExpense(companyId: number, expense: ExpenseInfos): Promise<Operation> {
-    const amount = expense.amount / 100;
-    const response = await this.axios.post(`/companies/${companyId}/operations`, {
+    return this.createOperation(companyId, {
       type: 'expense',
-      date: expense.date.toISO(),
+      date: expense.date.toISODate(),
       memo: expense.memo,
-      amount,
+      amount: expense.amount / 100,
       attachments: [],
       breakdowns: [
-        { amount, categoryId: expense.categoryId },
+        { amount: expense.amount / 100, categoryId: expense.categoryId },
         { amount: 0, categoryId: -1, isCounterpart: true, associationData: { partnerId: expense.partnerId } },
       ],
     });
-    return operationSchema.parse(response.data);
   }
 
   async listOperations(companyId: number, filter?: Partial<Operation>): Promise<Operation[]> {

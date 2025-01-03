@@ -27,14 +27,16 @@ import { DateTime } from 'luxon';
   });
   
   const user = await api.getMe();
+  const cars = await api.getCars(user.company.id);
 
-  await api.registerMileageAllowance(user.company.id, {
+  const operation = await api.registerMileageAllowance(user.company.id, {
     date: DateTime.now(),
     memo: 'Home -> Office',
-    distance: 38,
+    distance: 38, // km
+    carId: cars[0].id,
   });
   
-  await api.validateOperation(user.company.id, 77539);
+  await api.validateOperation(user.company.id, operation.id);
 })();
 ```
 ### Types
