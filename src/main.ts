@@ -1,6 +1,7 @@
 import axios, { AxiosError, AxiosRequestConfig } from 'axios';
 import * as _ from 'lodash';
 import { DateTime } from 'luxon';
+import * as mime from 'mime-types';
 
 import {
   Car,
@@ -14,6 +15,8 @@ import {
   operationSchema,
   Partner,
   partnerSchema,
+  UploadVendorInvoiceResponse,
+  uploadVendorInvoiceResponseSchema,
   User,
   userSchema,
 } from '@/schemas/types';
@@ -49,10 +52,12 @@ function isRetryableError({ config: request, response }: AxiosError, config: Ret
 }
 
 const RETRY_CONFIG = {
-  maxRetries: 3,
+  maxRetries: 4,
   retryableStatusCodes: [429, 500, 502, 503, 504],
-  delayStepMs: 350,
+  delayStepMs: 500,
 };
+
+const ALLOWED_MIME_TYPES = ['application/pdf', 'image/jpeg', 'image/png'];
 
 export abstract class DougsApi {
   protected readonly axios;
@@ -136,6 +141,21 @@ export abstract class DougsApi {
   }
 
   async registerExpense(companyId: number, expense: ExpenseInfos): Promise<Operation> {
+    const vatProps = expense.vatExemption
+      ? {
+          amountExcludingTaxesWithRecoverageRate: expense.amount / 100,
+          vatRate: null,
+          vatAmount: 0,
+          manualVatAmount: 0,
+          ...(typeof expense.vatExemption === 'string'
+            ? {
+                associationData: {
+                  vatExemptionReason: expense.vatExemption,
+                },
+              }
+            : {}),
+        }
+      : {};
     return this.createOperation(companyId, {
       type: 'expense',
       date: expense.date.toISODate(),
@@ -143,7 +163,11 @@ export abstract class DougsApi {
       amount: expense.amount / 100,
       attachments: [],
       breakdowns: [
-        { amount: expense.amount / 100, categoryId: expense.categoryId },
+        {
+          amount: expense.amount / 100,
+          categoryId: expense.categoryId,
+          ...vatProps,
+        },
         { amount: 0, categoryId: -1, isCounterpart: true, associationData: { partnerId: expense.partnerId } },
       ],
     });
@@ -223,5 +247,24 @@ export class DougsApiByLogin extends DougsApi {
       await this.login();
     }
     return this.sessionToken;
+  }
+
+  async uploadVendorInvoice(companyId: number, filename: string, buffer: Buffer): Promise<UploadVendorInvoiceResponse> {
+    const mimeType = mime.lookup(filename);
+    if (!mimeType) {
+      throw new Error(`Unsupported file extension for ${filename}`);
+    }
+    if (!ALLOWED_MIME_TYPES.includes(mimeType)) {
+      throw new Error(`Unsupported MIME type ${mimeType}`);
+    }
+
+    const formData = new FormData();
+    formData.append('file', new File([buffer], filename, { type: mimeType }));
+
+    const response = await this.axios.post(`/companies/${companyId}/vendor-invoices`, formData, {
+      params: { filename, type: 'attachment' },
+    });
+
+    return uploadVendorInvoiceResponseSchema.parse(response.data);
   }
 }

@@ -1,9 +1,8 @@
 import { DateTime } from 'luxon';
 import { z } from 'zod';
 
-const schemaValidDateTime = z
+const isoDateTimeSchema = z
   .string()
-  .date()
   .transform((value) => DateTime.fromISO(value))
   .refine((value) => value.isValid, { message: 'Invalid date' });
 
@@ -32,7 +31,7 @@ export const operationSchema = z.object({
 export type Operation = z.infer<typeof operationSchema>;
 
 export const mileageInfosSchema = z.object({
-  date: schemaValidDateTime,
+  date: isoDateTimeSchema,
   memo: z.string().optional(),
   distance: z.number().int(),
   carId: z.number().int().optional(),
@@ -41,12 +40,12 @@ export const mileageInfosSchema = z.object({
 export type MileageInfos = z.infer<typeof mileageInfosSchema>;
 
 export const expenseInfosSchema = z.object({
-  date: schemaValidDateTime,
+  date: isoDateTimeSchema,
   memo: z.string().optional(),
   amount: z.number().int(),
   categoryId: z.number().int(),
   partnerId: z.number().int(),
-  hasVat: z.boolean().optional().default(true),
+  vatExemption: z.union([z.boolean(), z.enum(['exemption:outbound:outsideEuropeanUnion'])]).default(false),
 });
 
 export type ExpenseInfos = z.infer<typeof expenseInfosSchema>;
@@ -108,3 +107,41 @@ export const partnerSchema = z.object({
 });
 
 export type Partner = z.infer<typeof partnerSchema>;
+
+export const uploadVendorInvoiceResponseSchema = z.object({
+  id: z.string().uuid(),
+  createdAt: isoDateTimeSchema,
+  updatedAt: isoDateTimeSchema,
+  fileName: z.string(),
+  ownerId: z.string(),
+  memo: z.string().nullable(),
+  paymentStatus: z.enum(['not_paid', 'paid']),
+  prefillStatus: z.enum(['initialised', 'prefilled']),
+  amount: z.number().nullable(),
+  isLocked: z.boolean(),
+  fileId: z.number(),
+  filePath: z.string(),
+  fileType: z.string(),
+  label: z.string(),
+  supplierName: z.string().nullable(),
+  supplierCountry: z.string().nullable(),
+  clientName: z.string(),
+  clientCountry: z.string().nullable(),
+  amountTva: z.number().nullable(),
+  currency: z.string(),
+  isRefund: z.boolean().nullable(),
+  type: z.string().nullable(),
+  reference: z.string().nullable(),
+  transactionType: z.string().nullable(),
+  date: isoDateTimeSchema.nullable(),
+  companyId: z.number(),
+  sourceDocumentId: z.number(),
+  operationAttachments: z.array(z.unknown()),
+  accrualOperationAttachment: z.unknown().nullable(),
+  operationCandidate: z.unknown().nullable(),
+  receiptId: z.number(),
+  operations: z.array(z.unknown()),
+  matchedOperation: z.unknown().nullable(),
+});
+
+export type UploadVendorInvoiceResponse = z.infer<typeof uploadVendorInvoiceResponseSchema>;
