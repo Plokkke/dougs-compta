@@ -200,6 +200,25 @@ export abstract class DougsApi {
   async deleteOperation(companyId: number, operationId: number): Promise<void> {
     await this.axios.delete(`/companies/${companyId}/operations/${operationId}`);
   }
+
+  async uploadVendorInvoice(companyId: number, filename: string, buffer: Buffer): Promise<UploadVendorInvoiceResponse> {
+    const mimeType = mime.lookup(filename);
+    if (!mimeType) {
+      throw new Error(`Unsupported file extension for ${filename}`);
+    }
+    if (!ALLOWED_MIME_TYPES.includes(mimeType)) {
+      throw new Error(`Unsupported MIME type ${mimeType}`);
+    }
+
+    const formData = new FormData();
+    formData.append('file', new File([buffer], filename, { type: mimeType }));
+
+    const response = await this.axios.post(`/companies/${companyId}/vendor-invoices`, formData, {
+      params: { filename, type: 'attachment' },
+    });
+
+    return uploadVendorInvoiceResponseSchema.parse(response.data);
+  }
 }
 
 export class DougsApiByLogin extends DougsApi {
@@ -247,24 +266,5 @@ export class DougsApiByLogin extends DougsApi {
       await this.login();
     }
     return this.sessionToken;
-  }
-
-  async uploadVendorInvoice(companyId: number, filename: string, buffer: Buffer): Promise<UploadVendorInvoiceResponse> {
-    const mimeType = mime.lookup(filename);
-    if (!mimeType) {
-      throw new Error(`Unsupported file extension for ${filename}`);
-    }
-    if (!ALLOWED_MIME_TYPES.includes(mimeType)) {
-      throw new Error(`Unsupported MIME type ${mimeType}`);
-    }
-
-    const formData = new FormData();
-    formData.append('file', new File([buffer], filename, { type: mimeType }));
-
-    const response = await this.axios.post(`/companies/${companyId}/vendor-invoices`, formData, {
-      params: { filename, type: 'attachment' },
-    });
-
-    return uploadVendorInvoiceResponseSchema.parse(response.data);
   }
 }
