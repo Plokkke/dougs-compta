@@ -1,0 +1,41 @@
+{
+  "name": "@plokkke/dougs-cli",
+  "version": "1.0.0",
+  "description": "Export your whole Dougs bookkeeping (operations, ledger breakdowns, invoices, receipts) to JSON and CSV.",
+  "keywords": [
+    "dougs",
+    "accounting",
+    "export",
+    "data-portability",
+    "cli"
+  ],
+  "author": "Antoine Caron <antoine@crn-tech.fr>",
+  "license": "MIT",
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/Plokkke/dougs-compta.git",
+    "directory": "packages/cli"
+  },
+  "type": "module",
+  "bin": {
+    "dougs": "./dist/main.js"
+  },
+  "files": [
+    "dist"
+  ],
+  "engines": {
+    "node": ">=20"
+  },
+  "scripts": {
+    "build": "tsup",
+    "test": "vitest run",
+    "typecheck": "tsc --noEmit",
+    "prepublishOnly": "pnpm build && pnpm test"
+  },
+  "dependencies": {
+    "@plokkke/dougs-compta": "workspace:^"
+  },
+  "devDependencies": {
+    "tsup": "^8.5.0"
+  }
+}
