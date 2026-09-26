@@ -12,8 +12,8 @@ const MFA_REQUIRED =
   'Dougs requires the verification code sent by email: provide onMfaChallenge, or reuse a browser session token';
 
 /**
- * Logging in sets `auth_session` right away, but the session stays unauthenticated until the emailed code is
- * verified. The login response does not say so, hence the probe on `/users/me`.
+ * Logging in sets `auth_session` right away, but the session stays unauthenticated until a code, whose email must be
+ * requested explicitly, is verified. The login response does not say so, hence the probe on `/users/me`.
  */
 export async function login(context: LoginContext, email: string, password: string): Promise<Session> {
   const { http, now, onMfaChallenge } = context;
@@ -25,6 +25,7 @@ export async function login(context: LoginContext, email: string, password: stri
   if (!onMfaChallenge) {
     throw new DougsAuthError(MFA_REQUIRED);
   }
+  await http.request('POST', '/auth/api/mfa/send-email', { anonymous: true, headers: cookieOf(session) });
   const code = (await onMfaChallenge({ type: 'email' })).trim();
   return verify(context, session, code);
 }

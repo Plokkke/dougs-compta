@@ -4,7 +4,7 @@
 
 ### Added
 
-- Email verification codes at login: pass `onMfaChallenge` to provide the code Dougs sends by email. The client
+- Email verification codes at login: the client requests the email, then `onMfaChallenge` provides the code. It
   detects whether the new session is already authenticated, so accounts without a second factor keep working.
 - `auth` accepts credentials together with a saved `sessionToken`: the saved session is used first, and the client logs
   in again only once it expires.
