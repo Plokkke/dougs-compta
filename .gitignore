@@ -10,6 +10,7 @@ coverage/
 # credentials, exported data and personal analyses never leave the machine
 private/
 .dougs.json
+.dougs-session.json
 .env
 export/
 local.*

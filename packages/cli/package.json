@@ -1,6 +1,6 @@
 {
   "name": "@plokkke/dougs-cli",
-  "version": "1.0.0",
+  "version": "1.1.0",
   "description": "Export your whole Dougs bookkeeping (operations, ledger breakdowns, invoices, receipts) to JSON and CSV.",
   "keywords": [
     "dougs",

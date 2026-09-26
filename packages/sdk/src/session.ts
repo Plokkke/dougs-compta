@@ -1,7 +1,8 @@
 import { DougsAuthError } from './errors';
 import type { Authenticator } from './http';
 
-export type DougsAuth = { email: string; password: string } | { sessionToken: string };
+/** Credentials let the client log in again on its own; a session token alone lives until it expires. */
+export type DougsAuth = { email: string; password: string; sessionToken?: string } | { sessionToken: string };
 
 export type Session = { token: string; expiresAt?: number };
 
@@ -18,7 +19,7 @@ export class SessionAuthenticator implements Authenticator {
     private readonly login: LoginFn,
     private readonly now: () => number = Date.now,
   ) {
-    if ('sessionToken' in auth) {
+    if (auth.sessionToken) {
       this.session = { token: auth.sessionToken };
     }
   }

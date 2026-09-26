@@ -11,7 +11,8 @@ import {
   type MileageInput,
 } from './payloads';
 import * as schemas from './schemas';
-import { SessionAuthenticator, sessionFromSetCookie, type DougsAuth, type Session } from './session';
+import { login, type MfaHandler } from './login';
+import { SessionAuthenticator, type DougsAuth } from './session';
 
 export const DOUGS_BASE_URL = 'https://app.dougs.fr';
 
@@ -39,6 +40,8 @@ export const OPERATIONS_PAGE_SIZE = 500;
 
 export type DougsClientOptions = {
   auth: DougsAuth;
+  /** Provides the verification code Dougs sends by email when a login needs a second factor. */
+  onMfaChallenge?: MfaHandler;
   baseUrl?: string;
   fetch?: FetchLike;
   retry?: RetryPolicy;
@@ -61,11 +64,8 @@ export class DougsClient {
       sleep: options.sleep ?? wait,
     };
     const anonymous = new HttpClient(base);
-    this.session = new SessionAuthenticator(
-      options.auth,
-      (email, password) => login(anonymous, now, email, password),
-      now,
-    );
+    const context = { http: anonymous, now, onMfaChallenge: options.onMfaChallenge };
+    this.session = new SessionAuthenticator(options.auth, (email, password) => login(context, email, password), now);
     this.http = new HttpClient({ ...base, auth: this.session });
   }
 
@@ -185,9 +185,4 @@ export class DougsClient {
     }
     return result.data;
   }
-}
-
-async function login(http: HttpClient, now: () => number, email: string, password: string): Promise<Session> {
-  const response = await http.request('POST', '/auth/api/login', { json: { email, password }, anonymous: true });
-  return sessionFromSetCookie(response.headers.getSetCookie(), now());
 }

@@ -8,7 +8,8 @@ DOUGS_EMAIL=you@company.com DOUGS_PASSWORD=... npx @plokkke/dougs-cli export --o
 ```
 
 Credentials come from `DOUGS_SESSION`, or `DOUGS_EMAIL` + `DOUGS_PASSWORD`, or a git-ignored `.dougs.json`
-(`{"email","password"}` or `{"sessionToken"}`).
+(`{"email","password"}` or `{"sessionToken"}`). When Dougs emails a verification code, the CLI asks for it, then keeps
+the session in `.dougs-session.json` (owner-only permissions) so the next runs skip the code until it expires.
 
 | Output                             | Content                                                         |
 | ---------------------------------- | --------------------------------------------------------------- |

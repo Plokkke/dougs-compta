@@ -18,6 +18,15 @@ export class DougsLoginApi implements ICredentialType {
   properties: INodeProperties[] = [
     { displayName: 'Email', name: 'username', type: 'string', placeholder: 'name@email.com', default: '' },
     { displayName: 'Password', name: 'password', type: 'string', typeOptions: { password: true }, default: '' },
+    {
+      displayName: 'Session Token',
+      name: 'sessionToken',
+      type: 'string',
+      typeOptions: { password: true },
+      default: '',
+      description:
+        'Value of the auth_session cookie after logging in to app.dougs.fr. Required when Dougs asks for a code sent by email, which n8n cannot type.',
+    },
   ];
 
   async authenticate(
@@ -34,5 +43,6 @@ export class DougsLoginApi implements ICredentialType {
 }
 
 export function authFrom(credentials: ICredentialDataDecryptedObject) {
-  return { email: String(credentials.username ?? ''), password: String(credentials.password ?? '') };
+  const sessionToken = String(credentials.sessionToken ?? '') || undefined;
+  return { email: String(credentials.username ?? ''), password: String(credentials.password ?? ''), sessionToken };
 }

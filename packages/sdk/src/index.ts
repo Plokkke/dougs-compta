@@ -2,6 +2,7 @@ export { COMPANY_COLLECTIONS, DOUGS_BASE_URL, DougsClient, OPERATIONS_PAGE_SIZE 
 export type { CategoryType, CompanyCollection, DougsClientOptions, OperationsQuery } from './client';
 export { DougsApiError, DougsAuthError, DougsSchemaError } from './errors';
 export { DEFAULT_RETRY_POLICY } from './http';
+export type { MfaChallenge, MfaHandler } from './login';
 export type { FetchLike, RetryPolicy } from './http';
 export { centsToEuros, eurosToCents } from './money';
 export type { Cents } from './money';

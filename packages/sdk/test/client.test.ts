@@ -2,7 +2,7 @@ import { describe, expect, it } from 'vitest';
 
 import { DougsClient, OPERATIONS_PAGE_SIZE } from '../src/client';
 import { DougsSchemaError } from '../src/errors';
-import { json, noSleep, scriptedFetch, status, type Reply } from './fake-fetch';
+import { answeringLoginProbe, json, noSleep, scriptedFetch, status, type Reply } from './fake-fetch';
 import { operation, user, vendorInvoice } from './fixtures';
 
 const loginReply = () =>
@@ -13,7 +13,7 @@ function dougs(...replies: Reply[]) {
   const client = new DougsClient({
     auth: { email: 'jane@example.com', password: 'secret' },
     baseUrl: 'https://dougs.test',
-    fetch: api.fetch,
+    fetch: answeringLoginProbe(api.fetch, user),
     sleep: noSleep,
   });
   return { client, requests: api.requests };

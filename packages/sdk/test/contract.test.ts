@@ -3,14 +3,18 @@ import { describe, expect, it } from 'vitest';
 import { DougsClient } from '../src/client';
 import { DougsApiError, DougsAuthError, DougsSchemaError } from '../src/errors';
 import { DEFAULT_RETRY_POLICY, HttpClient } from '../src/http';
-import { json, noSleep, scriptedFetch, status, type Reply } from './fake-fetch';
-import { operation, vendorInvoice } from './fixtures';
+import { answeringLoginProbe, json, noSleep, scriptedFetch, status, type Reply } from './fake-fetch';
+import { operation, user, vendorInvoice } from './fixtures';
 
 const loginReply = () => new Response('{}', { headers: [['Set-Cookie', 'auth_session=s; Max-Age=60']] });
 
 function dougs(...replies: Reply[]) {
   const api = scriptedFetch(...replies);
-  const client = new DougsClient({ auth: { email: 'a@b.c', password: 'p' }, fetch: api.fetch, sleep: noSleep });
+  const client = new DougsClient({
+    auth: { email: 'a@b.c', password: 'p' },
+    fetch: answeringLoginProbe(api.fetch, user),
+    sleep: noSleep,
+  });
   const sent = () => api.requests.map((r) => `${r.method} ${r.url.origin}${r.url.pathname}`);
   return { client, requests: api.requests, sent };
 }

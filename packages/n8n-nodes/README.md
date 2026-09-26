@@ -28,6 +28,10 @@ A typical workflow: an email trigger receives a receipt, and **Vendor Invoice â†
 Create a **Dougs Login API** credential with the email and password of your Dougs account. The node logs in like the
 web app does and renews the session when it expires.
 
+When Dougs protects the login with a code sent by email, n8n has no way to type it. Log in to app.dougs.fr in a
+browser, copy the value of the `auth_session` cookie into **Session Token**, and replace it when it expires (about a
+month).
+
 ## Compatibility
 
 Built and tested against `n8n-workflow` 2.x, Node 20+.

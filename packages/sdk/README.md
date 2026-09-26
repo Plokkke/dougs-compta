@@ -13,6 +13,12 @@ import { DougsClient } from '@plokkke/dougs-compta';
 const dougs = new DougsClient({ auth: { email: 'you@company.com', password: '...' } });
 // or reuse a browser session: new DougsClient({ auth: { sessionToken: '<auth_session cookie>' } })
 
+// when Dougs protects the login with a code sent by email:
+const withCode = new DougsClient({
+  auth: { email: 'you@company.com', password: '...' },
+  onMfaChallenge: async () => promptUser('Code received by email'),
+});
+
 const { company } = await dougs.getMe();
 for await (const operation of dougs.iterateOperations(company.id, { validated: false })) {
   console.log(operation.date, operation.wording, operation.amount);

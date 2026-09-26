@@ -32,6 +32,7 @@ export type RequestOptions = {
   /** Overrides the method-based idempotency rule, e.g. for a full-state update sent as POST. */
   idempotent?: boolean;
   anonymous?: boolean;
+  headers?: Record<string, string>;
 };
 
 export type HttpClientOptions = {
@@ -79,7 +80,11 @@ export class HttpClient {
   }
 
   private async send(method: string, path: string, opts: RequestOptions): Promise<Response> {
-    const headers: Record<string, string> = { Accept: 'application/json', Origin: this.options.baseUrl };
+    const headers: Record<string, string> = {
+      Accept: 'application/json',
+      Origin: this.options.baseUrl,
+      ...opts.headers,
+    };
     if (!opts.anonymous && this.options.auth) {
       headers.Cookie = await this.options.auth.cookie();
     }

@@ -1,6 +1,6 @@
 {
   "name": "@plokkke/n8n-nodes-dougs",
-  "version": "1.0.1",
+  "version": "1.1.0",
   "description": "n8n community node for Dougs: record expenses and mileage allowances, validate operations, upload invoices.",
   "keywords": [
     "n8n-community-node-package",

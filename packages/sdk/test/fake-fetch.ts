@@ -36,3 +36,17 @@ export function scriptedFetch(...replies: Reply[]) {
 }
 
 export const noSleep = async () => undefined;
+
+/** Answers the `/users/me` probe that follows every login, so tests only script the calls they care about. */
+export function answeringLoginProbe(fetch: FetchLike, user: unknown): FetchLike {
+  let afterLogin = false;
+  return async (input, init) => {
+    const path = new URL(input).pathname;
+    if (afterLogin && path === '/users/me') {
+      afterLogin = false;
+      return json(user);
+    }
+    afterLogin = path === '/auth/api/login';
+    return fetch(input, init);
+  };
+}
