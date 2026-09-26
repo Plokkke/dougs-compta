@@ -2,3 +2,4 @@ dist
 coverage
 reports
 pnpm-lock.yaml
+private

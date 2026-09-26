@@ -76,7 +76,7 @@ pnpm validate        # build, lint, typecheck, test every package
 pnpm mutation        # Stryker mutation testing of the SDK
 ```
 
-Node 20+ and pnpm are required. CI runs the validation on Node 20, 22 and 24.
+Node 20+ and pnpm are required. The git-ignored `private/` folder is where local exports and personal analyses live. CI runs the validation on Node 20, 22 and 24.
 
 ## Scope and responsibility
 

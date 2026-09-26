@@ -16,7 +16,7 @@ const n8nRules = (config) => ({
 });
 
 export default tseslint.config(
-  { ignores: ['**/dist/**', '**/coverage/**', '**/reports/**', '**/.stryker-tmp/**'] },
+  { ignores: ['**/dist/**', '**/coverage/**', '**/reports/**', '**/.stryker-tmp/**', 'private/**'] },
   js.configs.recommended,
   ...tseslint.configs.strict,
   {
