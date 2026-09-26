@@ -1,7 +1,7 @@
 import type { z } from 'zod';
 
 import { DougsSchemaError } from './errors';
-import { DEFAULT_RETRY_POLICY, HttpClient, type FetchLike, type Query, type RetryPolicy } from './http';
+import { connection, HttpClient, type ConnectionOptions, type Query } from './http';
 import {
   expensePayload,
   mergeDeep,
@@ -13,8 +13,6 @@ import {
 import * as schemas from './schemas';
 import { login, type MfaHandler } from './login';
 import { SessionAuthenticator, type DougsAuth } from './session';
-
-export const DOUGS_BASE_URL = 'https://app.dougs.fr';
 
 /** Read-only company collections confirmed against the live API. */
 export const COMPANY_COLLECTIONS = [
@@ -38,18 +36,12 @@ export type OperationsQuery = { type?: string; validated?: boolean; date?: strin
 /** The operations endpoint caps pages at 500 items. */
 export const OPERATIONS_PAGE_SIZE = 500;
 
-export type DougsClientOptions = {
+export type DougsClientOptions = ConnectionOptions & {
   auth: DougsAuth;
   /** Provides the verification code Dougs sends by email when a login needs a second factor. */
   onMfaChallenge?: MfaHandler;
-  baseUrl?: string;
-  fetch?: FetchLike;
-  retry?: RetryPolicy;
-  sleep?: (ms: number) => Promise<void>;
   now?: () => number;
 };
-
-const wait = (ms: number) => new Promise<void>((resolve) => setTimeout(resolve, ms));
 
 export class DougsClient {
   private readonly http: HttpClient;
@@ -57,12 +49,7 @@ export class DougsClient {
 
   constructor(options: DougsClientOptions) {
     const now = options.now ?? Date.now;
-    const base = {
-      baseUrl: options.baseUrl ?? DOUGS_BASE_URL,
-      fetch: options.fetch ?? fetch,
-      retry: options.retry ?? DEFAULT_RETRY_POLICY,
-      sleep: options.sleep ?? wait,
-    };
+    const base = connection(options);
     const anonymous = new HttpClient(base);
     const context = { http: anonymous, now, onMfaChallenge: options.onMfaChallenge };
     this.session = new SessionAuthenticator(options.auth, (email, password) => login(context, email, password), now);

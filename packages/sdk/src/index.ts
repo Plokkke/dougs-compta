@@ -1,9 +1,10 @@
-export { COMPANY_COLLECTIONS, DOUGS_BASE_URL, DougsClient, OPERATIONS_PAGE_SIZE } from './client';
+export { COMPANY_COLLECTIONS, DougsClient, OPERATIONS_PAGE_SIZE } from './client';
 export type { CategoryType, CompanyCollection, DougsClientOptions, OperationsQuery } from './client';
-export { DougsApiError, DougsAuthError, DougsSchemaError } from './errors';
-export { DEFAULT_RETRY_POLICY } from './http';
-export type { MfaChallenge, MfaHandler } from './login';
-export type { FetchLike, RetryPolicy } from './http';
+export { DougsApiError, DougsAuthError, DougsMfaRequiredError, DougsSchemaError } from './errors';
+export { DEFAULT_RETRY_POLICY, DOUGS_BASE_URL } from './http';
+export type { ConnectionOptions, FetchLike, RetryPolicy } from './http';
+export { requestLoginCode, verifyLoginCode } from './login';
+export type { LoginCodeRequest, MfaChallenge, MfaHandler } from './login';
 export { centsToEuros, eurosToCents } from './money';
 export type { Cents } from './money';
 export { VAT_EXEMPTION_REASONS } from './payloads';

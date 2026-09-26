@@ -33,5 +33,10 @@ export class DougsSchemaError extends Error {
 }
 
 export class DougsAuthError extends Error {
-  override readonly name = 'DougsAuthError';
+  override readonly name: string = 'DougsAuthError';
+}
+
+/** The session is gone and only the code Dougs sends by email can open a new one. */
+export class DougsMfaRequiredError extends DougsAuthError {
+  override readonly name = 'DougsMfaRequiredError';
 }

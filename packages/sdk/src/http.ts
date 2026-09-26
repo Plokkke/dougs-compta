@@ -1,5 +1,7 @@
 import { DougsApiError } from './errors';
 
+export const DOUGS_BASE_URL = 'https://app.dougs.fr';
+
 export type FetchLike = (input: string | URL, init?: RequestInit) => Promise<Response>;
 
 export type RetryPolicy = {
@@ -42,6 +44,25 @@ export type HttpClientOptions = {
   sleep: (ms: number) => Promise<void>;
   auth?: Authenticator;
 };
+
+/** Transport settings shared by the client and the standalone login steps; all injectable for tests. */
+export type ConnectionOptions = {
+  baseUrl?: string;
+  fetch?: FetchLike;
+  retry?: RetryPolicy;
+  sleep?: (ms: number) => Promise<void>;
+};
+
+const wait = (ms: number) => new Promise<void>((resolve) => setTimeout(resolve, ms));
+
+export function connection(options: ConnectionOptions = {}): HttpClientOptions {
+  return {
+    baseUrl: options.baseUrl ?? DOUGS_BASE_URL,
+    fetch: options.fetch ?? fetch,
+    retry: options.retry ?? DEFAULT_RETRY_POLICY,
+    sleep: options.sleep ?? wait,
+  };
+}
 
 export class HttpClient {
   constructor(private readonly options: HttpClientOptions) {}

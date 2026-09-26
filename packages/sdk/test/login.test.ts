@@ -1,7 +1,8 @@
 import { describe, expect, it } from 'vitest';
 
 import { DougsClient } from '../src/client';
-import { DougsAuthError } from '../src/errors';
+import { DougsAuthError, DougsMfaRequiredError } from '../src/errors';
+import { requestLoginCode, verifyLoginCode } from '../src/login';
 import { json, noSleep, scriptedFetch, status, type Reply } from './fake-fetch';
 import { user } from './fixtures';
 
@@ -106,5 +107,55 @@ describe('login with a second factor', () => {
       'auth_session=fresh',
       'auth_session=fresh',
     ]);
+  });
+});
+
+describe('login steps driven from outside', () => {
+  const options = (fetch: ReturnType<typeof scriptedFetch>['fetch']) => ({
+    baseUrl: 'https://dougs.test',
+    fetch,
+    now: () => 0,
+  });
+
+  it('logs in and has the code emailed, returning the pending session', async () => {
+    const api = scriptedFetch(sessionCookie('pending'), status(401), status(201));
+
+    const request = await requestLoginCode({ email: 'jane@example.com', password: 'secret' }, options(api.fetch));
+
+    expect(request).toEqual({ sessionToken: 'pending', codeRequired: true, expiresAt: 2_592_000_000 });
+    expect(api.requests.map((r) => r.url.pathname)).toEqual([
+      '/auth/api/login',
+      '/users/me',
+      '/auth/api/mfa/send-email',
+    ]);
+  });
+
+  it('sends no email when the session is already authenticated', async () => {
+    const api = scriptedFetch(sessionCookie('ready'), json(user));
+
+    await expect(requestLoginCode({ email: 'a@b.c', password: 'p' }, options(api.fetch))).resolves.toMatchObject({
+      sessionToken: 'ready',
+      codeRequired: false,
+    });
+    expect(api.requests).toHaveLength(2);
+  });
+
+  it('verifies the code against the pending session', async () => {
+    const api = scriptedFetch(sessionCookie('verified'));
+
+    await expect(verifyLoginCode('pending', ' 123456\n', options(api.fetch))).resolves.toEqual({
+      token: 'verified',
+      expiresAt: 2_592_000_000,
+    });
+    expect(api.requests[0]).toMatchObject({
+      body: { token: '123456', type: 'email' },
+      headers: { Cookie: 'auth_session=pending' },
+    });
+  });
+
+  it('signals a required code with a dedicated error when nobody can type it', async () => {
+    const { client } = dougs(undefined, sessionCookie('pending'), status(401));
+
+    await expect(client.sessionToken()).rejects.toBeInstanceOf(DougsMfaRequiredError);
   });
 });

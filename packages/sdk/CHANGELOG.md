@@ -6,6 +6,8 @@
 
 - Email verification codes at login: the client requests the email, then `onMfaChallenge` provides the code. It
   detects whether the new session is already authenticated, so accounts without a second factor keep working.
+- `requestLoginCode` and `verifyLoginCode` expose both halves of that login, for callers that cannot prompt (an n8n
+  workflow reads the code from the mailbox), and `DougsMfaRequiredError` tells them a new code is needed.
 - `auth` accepts credentials together with a saved `sessionToken`: the saved session is used first, and the client logs
   in again only once it expires.
 
