@@ -1,0 +1,12 @@
+{
+  "node": "@plokkke/n8n-nodes-dougs.dougs",
+  "nodeVersion": "1.0",
+  "codexVersion": "1.0",
+  "categories": ["Finance & Accounting"],
+  "resources": {
+    "primaryDocumentation": [{ "url": "https://github.com/Plokkke/dougs-compta/tree/main/packages/n8n-nodes" }],
+    "credentialDocumentation": [
+      { "url": "https://github.com/Plokkke/dougs-compta/tree/main/packages/n8n-nodes#credentials" }
+    ]
+  }
+}

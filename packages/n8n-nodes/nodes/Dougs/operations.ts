@@ -1,0 +1,110 @@
+import type { IDataObject, IExecuteFunctions } from 'n8n-workflow';
+
+import type { DougsClient } from '@plokkke/dougs-compta';
+
+import { fields, type FieldName } from './fields';
+
+export const RESOURCES = [
+  { name: 'Expense', value: 'expense' },
+  { name: 'Mileage Allowance', value: 'mileageAllowance' },
+  { name: 'Operation', value: 'operation' },
+  { name: 'Vendor Invoice', value: 'vendorInvoice' },
+] as const;
+
+export type Resource = (typeof RESOURCES)[number]['value'];
+
+export type OperationDefinition = {
+  resource: Resource;
+  value: string;
+  name: string;
+  action: string;
+  fields: FieldName[];
+  run: (client: DougsClient, context: IExecuteFunctions, item: number) => Promise<unknown>;
+};
+
+const companyAndOperation = (context: IExecuteFunctions, item: number) =>
+  [fields.companyId.read(context, item), fields.operationId.read(context, item)] as const;
+
+export const OPERATIONS: OperationDefinition[] = [
+  {
+    resource: 'expense',
+    value: 'create',
+    name: 'Create',
+    action: 'Create an expense',
+    fields: ['companyId', 'date', 'memo', 'amount', 'categoryId', 'partnerId', 'vatExemption'],
+    run: (client, context, item) =>
+      client.registerExpense(fields.companyId.read(context, item), {
+        date: fields.date.read(context, item),
+        memo: fields.memo.read(context, item),
+        amountCents: fields.amount.read(context, item),
+        categoryId: fields.categoryId.read(context, item),
+        partnerId: fields.partnerId.read(context, item),
+        vatExemption: fields.vatExemption.read(context, item),
+      }),
+  },
+  {
+    resource: 'mileageAllowance',
+    value: 'create',
+    name: 'Create',
+    action: 'Create a mileage allowance',
+    fields: ['companyId', 'date', 'memo', 'distance', 'carId'],
+    run: (client, context, item) =>
+      client.registerMileageAllowance(fields.companyId.read(context, item), {
+        date: fields.date.read(context, item),
+        memo: fields.memo.read(context, item),
+        distanceKm: fields.distance.read(context, item),
+        carId: fields.carId.read(context, item),
+      }),
+  },
+  {
+    resource: 'operation',
+    value: 'validate',
+    name: 'Validate',
+    action: 'Validate an operation',
+    fields: ['companyId', 'operationId'],
+    run: (client, context, item) => client.validateOperation(...companyAndOperation(context, item)),
+  },
+  {
+    resource: 'operation',
+    value: 'invalidate',
+    name: 'Invalidate',
+    action: 'Invalidate an operation',
+    fields: ['companyId', 'operationId'],
+    run: (client, context, item) => client.invalidateOperation(...companyAndOperation(context, item)),
+  },
+  {
+    resource: 'operation',
+    value: 'delete',
+    name: 'Delete',
+    action: 'Delete an operation',
+    fields: ['companyId', 'operationId'],
+    run: async (client, context, item) => {
+      const [companyId, operationId] = companyAndOperation(context, item);
+      await client.deleteOperation(companyId, operationId);
+      return { deleted: true, operationId };
+    },
+  },
+  {
+    resource: 'vendorInvoice',
+    value: 'upload',
+    name: 'Upload',
+    action: 'Upload a vendor invoice',
+    fields: ['companyId', 'binaryPropertyName'],
+    run: async (client, context, item) => {
+      const property = fields.binaryPropertyName.read(context, item);
+      const binary = context.helpers.assertBinaryData(item, property);
+      const content = await context.helpers.getBinaryDataBuffer(item, property);
+      return client.uploadVendorInvoice(
+        fields.companyId.read(context, item),
+        binary.fileName ?? 'invoice.pdf',
+        content,
+      );
+    },
+  },
+];
+
+export function findOperation(resource: string, operation: string): OperationDefinition | undefined {
+  return OPERATIONS.find((definition) => definition.resource === resource && definition.value === operation);
+}
+
+export const toJson = (value: unknown): IDataObject => JSON.parse(JSON.stringify(value ?? {})) as IDataObject;
