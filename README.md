@@ -8,11 +8,11 @@ Unofficial TypeScript toolkit for [Dougs](https://www.dougs.fr/), the online acc
 my consulting company. Dougs has no public API, only the private one behind its web app. This repository wraps it in
 a typed client, then builds two tools on top:
 
-| Package                                          | What it does                                                                                        |
-| ------------------------------------------------ | --------------------------------------------------------------------------------------------------- |
-| [`@plokkke/dougs-compta`](packages/sdk)          | Typed client: session handling, idempotency-aware retries, validated responses, integer-cent inputs |
-| [`@plokkke/dougs-cli`](packages/cli)             | `dougs export`: the whole bookkeeping as lossless JSON + CSV, invoice documents included            |
-| [`@plokkke/n8n-nodes-dougs`](packages/n8n-nodes) | n8n node: book expenses and mileage allowances, validate operations, upload receipts from workflows |
+| Package                                          | What it does                                                                                                          |
+| ------------------------------------------------ | --------------------------------------------------------------------------------------------------------------------- |
+| [`@plokkke/dougs-compta`](packages/sdk)          | Typed client: login with email verification code, idempotency-aware retries, validated responses, integer-cent inputs |
+| [`@plokkke/dougs-cli`](packages/cli)             | `dougs export`: the whole bookkeeping as lossless JSON + CSV, invoice documents included                              |
+| [`@plokkke/n8n-nodes-dougs`](packages/n8n-nodes) | n8n node: book expenses and mileage allowances, validate operations, upload receipts from workflows                   |
 
 I built it to automate recurring bookkeeping chores (mileage allowances, receipts) from n8n, and to keep a full,
 independent copy of my company's accounting data.
