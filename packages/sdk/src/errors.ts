@@ -13,6 +13,8 @@ export class DougsApiError extends Error {
   }
 }
 
+const MAX_REPORTED_ISSUES = 5;
+
 /** The API answered, but not with the shape this SDK relies on: better to stop than to guess. */
 export class DougsSchemaError extends Error {
   override readonly name = 'DougsSchemaError';
@@ -21,8 +23,12 @@ export class DougsSchemaError extends Error {
     readonly path: string,
     readonly issues: z.core.$ZodIssue[],
   ) {
-    const details = issues.map((issue) => `${issue.path.join('.') || '<root>'}: ${issue.message}`).join('; ');
-    super(`Unexpected response shape from ${path}: ${details}`);
+    const details = issues
+      .slice(0, MAX_REPORTED_ISSUES)
+      .map((issue) => `${issue.path.join('.') || '<root>'}: ${issue.message}`)
+      .join('; ');
+    const more = issues.length > MAX_REPORTED_ISSUES ? ` (and ${issues.length - MAX_REPORTED_ISSUES} more)` : '';
+    super(`Unexpected response shape from ${path}: ${details}${more}`);
   }
 }
 

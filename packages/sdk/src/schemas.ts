@@ -25,14 +25,14 @@ export const carSchema = z.looseObject({
   id: z.number(),
   name: z.string(),
   content: z.looseObject({ licensePlate: z.string() }),
-  partner: z.looseObject({ naturalPerson: personSchema }),
+  partner: z.looseObject({ naturalPerson: personSchema }).nullable(),
 });
 
 export const categorySchema = z.looseObject({
   id: z.number(),
   wording: z.string(),
-  keywords: z.array(z.string()),
-  description: z.string(),
+  keywords: z.array(z.string()).default([]),
+  description: z.string().nullable(),
 });
 
 export const partnerSchema = z.looseObject({
@@ -67,7 +67,7 @@ export const vendorInvoiceSchema = z.looseObject({
   amount: z.number().nullable(),
   amountTva: z.number().nullable(),
   currency: z.string(),
-  paymentStatus: z.enum(['not_paid', 'paid']),
+  paymentStatus: z.enum(['not_paid', 'partially_paid', 'paid']),
   companyId: z.number(),
 });
 

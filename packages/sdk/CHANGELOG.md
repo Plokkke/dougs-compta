@@ -1,5 +1,13 @@
 # Changelog
 
+## 1.0.1
+
+### Fixed
+
+- Schemas aligned with responses recorded on a real account: categories may have a `null` description and no
+  `keywords` (now `[]`), a car may have no partner, vendor invoices may be `partially_paid`.
+- Schema errors list the first five issues and count the rest, instead of printing every failing item.
+
 ## 1.0.0
 
 Rewrite on the platform `fetch`; the only runtime dependency left is Zod (axios, lodash, luxon and mime-types removed).

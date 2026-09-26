@@ -128,3 +128,35 @@ describe('errors', () => {
     expect(new DougsAuthError('x').name).toBe('DougsAuthError');
   });
 });
+
+describe('shapes observed on a real account', () => {
+  const person = { id: 1, firstName: 'Jane', lastName: 'Doe', fullName: 'Jane Doe', initials: 'JD' };
+
+  it('accepts categories without keywords or description', async () => {
+    const { client } = dougs(loginReply(), json([{ id: 1, wording: 'Ventes', description: null }]));
+
+    await expect(client.listCategories(42, 'revenue')).resolves.toEqual([
+      { id: 1, wording: 'Ventes', description: null, keywords: [] },
+    ]);
+  });
+
+  it('accepts a car that is not assigned to a partner', async () => {
+    const car = { id: 1, name: 'Van', content: { licensePlate: 'AB-123-CD' }, partner: null };
+    const { client } = dougs(loginReply(), json([car, { ...car, id: 2, partner: { naturalPerson: person } }]));
+
+    await expect(client.listCars(42)).resolves.toHaveLength(2);
+  });
+
+  it('accepts partially paid vendor invoices', async () => {
+    const { client } = dougs(loginReply(), json([{ ...vendorInvoice, paymentStatus: 'partially_paid' }]));
+
+    await expect(client.listVendorInvoices(42)).resolves.toHaveLength(1);
+  });
+
+  it('keeps schema errors readable when many items drift', () => {
+    const issues = Array.from({ length: 800 }, (_, i) => ({ code: 'custom', path: [i, 'keywords'], message: 'x' }));
+    const error = new DougsSchemaError('/c', issues as unknown as ConstructorParameters<typeof DougsSchemaError>[1]);
+
+    expect(error.message).toMatch(/4\.keywords: x \(and 795 more\)$/);
+  });
+});

@@ -34,7 +34,7 @@ export const listSearch = {
     (await client.listCategories(companyId, 'expense', filter)).map((category) => ({
       name: category.wording,
       value: String(category.id),
-      description: category.description,
+      description: category.description ?? undefined,
     })),
   ),
 };
