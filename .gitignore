@@ -1,8 +1,14 @@
-.idea/
-dist/
 node_modules/
-
+dist/
 reports/
-local.ts
-
+coverage/
+.stryker-tmp/
+*.tsbuildinfo
+.idea/
 .DS_Store
+
+# credentials and exported data never leave the machine
+.dougs.json
+.env
+export/
+local.*

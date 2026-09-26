@@ -1,0 +1,7 @@
+packages:
+  - packages/*
+
+allowBuilds:
+  esbuild: true
+  eslint-plugin-n8n-nodes-base: false
+  isolated-vm: false
