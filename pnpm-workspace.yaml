@@ -5,3 +5,5 @@ allowBuilds:
   esbuild: true
   eslint-plugin-n8n-nodes-base: false
   isolated-vm: false
+  cpu-features: false
+  ssh2: false

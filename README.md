@@ -76,6 +76,8 @@ pnpm validate        # build, lint, typecheck, test every package
 pnpm mutation        # Stryker mutation testing of the SDK
 ```
 
+Releases are published by GitHub Actions when a `v*.*.*` tag is pushed, with an npm provenance statement.
+
 Node 20+ and pnpm are required. The git-ignored `private/` folder is where local exports and personal analyses live. CI runs the validation on Node 20, 22 and 24.
 
 ## Scope and responsibility

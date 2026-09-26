@@ -82,6 +82,30 @@ export const fields = {
     { displayName: 'Operation ID', name: 'operationId', type: 'number', default: 0, required: true },
     toId('Operation ID'),
   ),
+  pendingSessionToken: field(
+    {
+      displayName: 'Pending Session Token',
+      name: 'pendingSessionToken',
+      type: 'string',
+      typeOptions: { password: true },
+      default: '={{ $json.sessionToken }}',
+      required: true,
+      hint: 'The session token returned by Request Code',
+    },
+    (v) => String(v ?? ''),
+  ),
+  code: field(
+    {
+      displayName: 'Code',
+      name: 'code',
+      type: 'string',
+      default: '',
+      required: true,
+      placeholder: 'e.g. 517261',
+      hint: 'The code received by email',
+    },
+    (v) => String(v ?? ''),
+  ),
   binaryPropertyName: field(
     {
       displayName: 'Input Binary Field',

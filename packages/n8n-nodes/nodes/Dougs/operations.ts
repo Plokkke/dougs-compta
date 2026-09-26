@@ -1,13 +1,16 @@
 import type { IDataObject, IExecuteFunctions } from 'n8n-workflow';
 
-import type { DougsClient } from '@plokkke/dougs-compta';
+import { requestLoginCode, verifyLoginCode, type DougsClient } from '@plokkke/dougs-compta';
 
+import { authFrom } from '../../credentials/DougsLoginApi.credentials';
+import { CREDENTIALS_NAME } from './client';
 import { fields, type FieldName } from './fields';
 
 export const RESOURCES = [
   { name: 'Expense', value: 'expense' },
   { name: 'Mileage Allowance', value: 'mileageAllowance' },
   { name: 'Operation', value: 'operation' },
+  { name: 'Session', value: 'session' },
   { name: 'Vendor Invoice', value: 'vendorInvoice' },
 ] as const;
 
@@ -25,7 +28,7 @@ export type OperationDefinition = {
 const companyAndOperation = (context: IExecuteFunctions, item: number) =>
   [fields.companyId.read(context, item), fields.operationId.read(context, item)] as const;
 
-export const OPERATIONS: OperationDefinition[] = [
+const BOOKKEEPING_OPERATIONS: OperationDefinition[] = [
   {
     resource: 'expense',
     value: 'create',
@@ -102,6 +105,38 @@ export const OPERATIONS: OperationDefinition[] = [
     },
   },
 ];
+
+const isoDate = (epochMs?: number) => (epochMs === undefined ? null : new Date(epochMs).toISOString());
+
+/** Lets a workflow complete the email verification Dougs requires at login, then store the resulting session. */
+const SESSION_OPERATIONS: OperationDefinition[] = [
+  {
+    resource: 'session',
+    value: 'requestCode',
+    name: 'Request Code',
+    action: 'Request a login code by email',
+    fields: [],
+    run: async (_client, context) => {
+      const { email, password } = authFrom(await context.getCredentials(CREDENTIALS_NAME));
+      const request = await requestLoginCode({ email, password });
+      return { ...request, requestedAt: new Date().toISOString(), expiresAt: isoDate(request.expiresAt) };
+    },
+  },
+  {
+    resource: 'session',
+    value: 'verifyCode',
+    name: 'Verify Code',
+    action: 'Verify the login code received by email',
+    fields: ['pendingSessionToken', 'code'],
+    run: async (_client, context, item) => {
+      const pending = fields.pendingSessionToken.read(context, item);
+      const session = await verifyLoginCode(pending, fields.code.read(context, item));
+      return { sessionToken: session.token, expiresAt: isoDate(session.expiresAt) };
+    },
+  },
+];
+
+export const OPERATIONS = [...BOOKKEEPING_OPERATIONS, ...SESSION_OPERATIONS];
 
 export function findOperation(resource: string, operation: string): OperationDefinition | undefined {
   return OPERATIONS.find((definition) => definition.resource === resource && definition.value === operation);

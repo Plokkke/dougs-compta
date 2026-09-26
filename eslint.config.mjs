@@ -1,5 +1,6 @@
 import js from '@eslint/js';
 import prettier from 'eslint-config-prettier';
+import communityNodes from '@n8n/eslint-plugin-community-nodes';
 import n8nNodes from 'eslint-plugin-n8n-nodes-base';
 import tseslint from 'typescript-eslint';
 
@@ -29,5 +30,14 @@ export default tseslint.config(
   { files: ['**/test/**'], rules: { 'max-lines-per-function': 'off' } },
   { files: ['packages/n8n-nodes/nodes/**/*.ts'], ...n8nRules('nodes') },
   { files: ['packages/n8n-nodes/credentials/**/*.ts'], ...n8nRules('credentials') },
+  {
+    files: ['packages/n8n-nodes/{nodes,credentials}/**/*.ts'],
+    ...communityNodes.configs.recommendedWithoutN8nCloudSupport,
+    rules: {
+      ...communityNodes.configs.recommendedWithoutN8nCloudSupport.rules,
+      // Unverified node on purpose: it reuses the SDK instead of duplicating the Dougs client.
+      '@n8n/community-nodes/no-runtime-dependencies': 'off',
+    },
+  },
   prettier,
 );

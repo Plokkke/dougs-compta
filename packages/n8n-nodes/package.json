@@ -26,7 +26,7 @@
     "node": ">=20"
   },
   "scripts": {
-    "build": "tsc -p tsconfig.build.json && cp nodes/Dougs/logo.png nodes/Dougs/Dougs.node.json dist/nodes/Dougs/",
+    "build": "tsc -p tsconfig.build.json && cp nodes/Dougs/Dougs.node.json dist/nodes/Dougs/ && cp -R icons dist/",
     "test": "vitest run",
     "typecheck": "tsc --noEmit",
     "prepublishOnly": "pnpm build && pnpm test"
@@ -47,6 +47,6 @@
     "n8n-workflow": "*"
   },
   "devDependencies": {
-    "n8n-workflow": "^2.16.0"
+    "n8n-workflow": "^2.38.1"
   }
 }

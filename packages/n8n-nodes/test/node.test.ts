@@ -22,7 +22,13 @@ describe('buildProperties', () => {
 
   it('lists the operations of every resource', () => {
     const operations = properties.filter((p) => p.name === 'operation').map((p) => p.options?.map((o) => o.name));
-    expect(operations).toEqual([['Create'], ['Create'], ['Validate', 'Invalidate', 'Delete'], ['Upload']]);
+    expect(operations).toEqual([
+      ['Create'],
+      ['Create'],
+      ['Validate', 'Invalidate', 'Delete'],
+      ['Request Code', 'Verify Code'],
+      ['Upload'],
+    ]);
   });
 });
 

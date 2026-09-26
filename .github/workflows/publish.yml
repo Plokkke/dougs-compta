@@ -1,0 +1,27 @@
+name: Publish
+
+on:
+  push:
+    tags: ['v*.*.*']
+
+permissions:
+  contents: read
+  id-token: write
+
+jobs:
+  publish:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: pnpm/action-setup@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 24
+          cache: pnpm
+          registry-url: https://registry.npmjs.org
+      - run: pnpm install --frozen-lockfile
+      - run: pnpm validate
+      # pnpm pack rewrites workspace:^ ranges; npm publish then signs each tarball with a provenance statement
+      # through npm Trusted Publishing (OIDC), so no token or one-time password is involved.
+      - run: pnpm -r pack --pack-destination "$PWD/artifacts"
+      - run: for tarball in artifacts/*.tgz; do npm publish "$tarball" --access public --provenance; done

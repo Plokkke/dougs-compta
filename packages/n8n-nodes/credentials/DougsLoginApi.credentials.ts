@@ -13,6 +13,8 @@ export class DougsLoginApi implements ICredentialType {
 
   displayName = 'Dougs Login API';
 
+  icon = { light: 'file:../icons/dougs.png', dark: 'file:../icons/dougs.png' } as const;
+
   documentationUrl = 'https://github.com/Plokkke/dougs-compta/tree/main/packages/n8n-nodes#credentials';
 
   properties: INodeProperties[] = [

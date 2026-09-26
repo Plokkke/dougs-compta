@@ -7,22 +7,25 @@ import {
   type INodeTypeDescription,
 } from 'n8n-workflow';
 
+import type { DougsClient } from '@plokkke/dougs-compta';
+
 import { CREDENTIALS_NAME, dougsClient } from './client';
+import { toNodeError } from './errors';
 import { listSearch } from './lookups';
-import { findOperation, OPERATIONS, toJson } from './operations';
+import { findOperation, OPERATIONS, toJson, type OperationDefinition } from './operations';
 import { buildProperties } from './properties';
 
 export class Dougs implements INodeType {
   description: INodeTypeDescription = {
     displayName: 'Dougs',
     name: 'dougs',
-    // eslint-disable-next-line n8n-nodes-base/node-class-description-icon-not-svg
-    icon: 'file:logo.png',
+    icon: { light: 'file:../../icons/dougs.png', dark: 'file:../../icons/dougs.png' },
     group: ['transform'],
     version: 1,
     subtitle: '={{ $parameter["operation"] + ": " + $parameter["resource"] }}',
     description: 'Record expenses, mileage allowances and invoices in Dougs',
     defaults: { name: 'Dougs' },
+    usableAsTool: true,
     inputs: [NodeConnectionTypes.Main],
     outputs: [NodeConnectionTypes.Main],
     credentials: [{ name: CREDENTIALS_NAME, required: true }],
@@ -38,19 +41,22 @@ export class Dougs implements INodeType {
     if (!definition) {
       throw new NodeOperationError(this.getNode(), `Unsupported operation "${operation}" on "${resource}"`);
     }
-
     const client = await dougsClient(this);
     const output: INodeExecutionData[] = [];
     for (let item = 0; item < this.getInputData().length; item++) {
-      try {
-        output.push({ json: toJson(await definition.run(client, this, item)), pairedItem: { item } });
-      } catch (error) {
-        if (!this.continueOnFail()) {
-          throw new NodeOperationError(this.getNode(), error as Error, { itemIndex: item });
-        }
-        output.push({ json: { error: (error as Error).message }, pairedItem: { item } });
-      }
+      output.push(await runItem(this, client, definition, item));
     }
     return [output];
+  }
+}
+
+async function runItem(context: IExecuteFunctions, client: DougsClient, definition: OperationDefinition, item: number) {
+  try {
+    return { json: toJson(await definition.run(client, context, item)), pairedItem: { item } };
+  } catch (error) {
+    if (!context.continueOnFail()) {
+      throw toNodeError(context.getNode(), error, item);
+    }
+    return { json: { error: (error as Error).message }, pairedItem: { item } };
   }
 }
