@@ -117,8 +117,8 @@ const BOOKKEEPING_OPERATIONS: OperationDefinition[] = [
   {
     resource: 'operation',
     value: 'setVat',
-    name: 'Set VAT',
-    action: 'Set a zero VAT rate and its reason',
+    name: 'Set Zero VAT',
+    action: 'Set the VAT rate to zero and pick the exemption reason',
     fields: ['companyId', 'operationId', 'vatExemptionReason'],
     run: (client, context, item) => {
       const [companyId, operationId] = companyAndOperation(context, item);

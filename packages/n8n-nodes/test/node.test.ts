@@ -27,7 +27,7 @@ describe('buildProperties', () => {
     expect(operations).toEqual([
       ['Create'],
       ['Create'],
-      ['Validate', 'Invalidate', 'Delete', 'List', 'Set VAT'],
+      ['Validate', 'Invalidate', 'Delete', 'List', 'Set Zero VAT'],
       ['Request Code', 'Verify Code'],
       ['Upload', 'Download'],
     ]);
